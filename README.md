@@ -100,6 +100,7 @@ We need to have a held-out test data, that will not be used for training the mod
 
     ```
     # change the label to a factor (categorical variable) instead of a character 
+    
     data$cancer = as.factor(data$cancer)
     ```
 
@@ -146,15 +147,21 @@ How do we access this prediction? To do that let's write a function to calculate
 
 ```
 # function to compare predicted to actual class
+
 check_pred_class = function(dat, pred){
+
   # correct answers
   actual = data.frame(id = rownames(dat), cancer = dat$cancer)
+  
   # predicted answers
   predicted = data.frame(id = rownames(dat), cancer = pred)
+  
   # compare predicted to actual
   comparison = merge(actual, predicted, by = 'id', all = F)
+  
   # fraction correct
   sum(comparison$cancer.x == comparison$cancer.y)/nrow(comparison)
+  
 }
 ```
 
