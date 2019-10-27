@@ -82,7 +82,7 @@ The next step is to split the data into a training set (80% of the data) and a t
 
 Why are we doing this? Because to have a reliable model, we need to follow the ML pipeline seen in Figure 1.
 
-
+![Machine Learning Pipeline](Figure_1.pdf)
 
   - Random forest needs the label to be a factor if we want to do classification modeling. 
     We are classifying `having cancer` or `not having cancer`.
