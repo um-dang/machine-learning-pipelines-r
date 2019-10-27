@@ -130,11 +130,10 @@ We need to have a held-out test data, that will not be used for training the mod
  ```
 # Default mtry = max(floor(ncol(data)/3), 1)
 # Default ntree =  500
-rf_train = randomForest(cancer ~ ., # use all OTUs as features
-                        data = train, # training data
-                        ntree = 500, # grow 500 trees in random forest
-                        importance = T, # Include to get importance of features
-                        mtry=500) # Number of features to use to make a decision
+rf_train = randomForest(cancer ~ ., 
+                        data = train, 
+                        ntree = 500, 
+                        mtry=500) 
 ```
 
 11. How does our model do? We need to test on the held-out 20%. We use a `predict` function part of the `randomForest` package. 
