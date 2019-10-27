@@ -206,7 +206,7 @@ test$cancer <- ifelse(test$cancer == 1, "cancer", "normal")
       - What `mtry` options are we trying in cross-validation?
       
       ```
-      grid <-  expand.grid(mtry = c(100, 500, 1000))
+      grid <-  expand.grid(mtry = c(500, 1000))
       ```
       - Let's train the model:
 
@@ -217,14 +217,42 @@ test$cancer <- ifelse(test$cancer == 1, "cancer", "normal")
                         metric = "Accuracy",
                         tuneGrid = grid,
                         trControl = cv,
-                        ntree=500) # not tuning ntree
+                        ntree=500,
+                        returnResamp="final") # not tuning ntree
       ```
+4. Our model is trained and we can see how each `mtry` did. 
 
-4. Now we have the trained model and our model picked the best `mtry` to use, let's predict on test set.
+```
+trained_model
+```
+
+```
+Random Forest 
+
+ 234 samples
+5206 predictors
+   2 classes: 'cancer', 'normal' 
+
+No pre-processing
+Resampling: Cross-Validated (5 fold) 
+Summary of sample sizes: 187, 187, 187, 188, 187 
+Resampling results across tuning parameters:
+
+  mtry  Accuracy   Kappa    
+   500  0.7393154  0.4175905
+  1000  0.7435708  0.4279107
+
+Accuracy was used to select the optimal model using the largest value.
+The final value used for the model was mtry = 1000.
+```
+
+So, `mtry=1000` was better than `mtry=500` and cross-validation step helped us recognize that. `Caret` package automatically trained on the full training data with `mtry=1000` after determining that it was the best one.
+
+5. Now we have the trained model and our model picked the best `mtry` to use, let's predict on test set.
 ```
 rf_pred <- predict(trained_model, test)
 ```
-5. Let's see how the model did. We can use the `confusionMatrix` function in the `caret` package.
+6. Let's see how the model did. We can use the `confusionMatrix` function in the `caret` package.
 ```
 confusionMatrix(rf_pred, as.factor(test$cancer))
 ```
@@ -254,6 +282,7 @@ Prediction cancer normal
    Detection Prevalence : 0.1897          
       Balanced Accuracy : 0.7031          
                                           
-       'Positive' Class : cancer   ```
+       'Positive' Class : cancer
+```
 
   
