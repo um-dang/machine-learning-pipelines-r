@@ -49,7 +49,7 @@ library(randomForest)
 5. We are now ready to read in our data.
 ```{r}
 # load in data
-data = read.delim('../data/data.tsv')
+data = read.delim('data/data.tsv')
 ```
 
 6. Explore data
