@@ -2,11 +2,11 @@
 
 Our goal is to try to predict whether someone has colorectal cancer based on the abundance of different bacteria in their stool microbiome.
 
-Feaures: 16S rRNA gene abundances clustered to OTUs (represent bacterial abundances)
+__Feaures:__ 16S rRNA gene abundances clustered to OTUs (represent bacterial abundances)
 
-Label: Health outcome (whether the patient has colorectal cancer or not)
+__Label:__ Health outcome (whether the patient has colorectal cancer or not)
 
-Classification algorithm: Random forest
+__Classification algorithm:__ Random forest
 
 - Data from: https://github.com/SchlossLab/Sze_CRCMetaAnalysis_mBio_2018
 - Modified from: https://github.com/BTopcuoglu/MachineLearning/blob/master/code/learning/model_pipeline.R
@@ -25,9 +25,9 @@ Credit: Thank you Zena Lapp for your live-coding scripts.
 
 2. Create a folder in your Documents directory called `machine-learninig-pipelines-r`. Then within that folder, create another folder called `data`. Move the data.tsv file you downloaded into `data` folder.
 
-3. Open RStudio. Go to `File` tab, click on `New Project`, create a project on `Existing Directory`, navigate to `machine-learninig-pipelines-r` directory and start the new project. Now you can open a New R script clicking on the green plus in RStudio. 
+__3. Open RStudio.__ Go to `File` tab, click on `New Project`, create a project on `Existing Directory`, navigate to `machine-learninig-pipelines-r` directory and start the new project. Now you can open a New R script clicking on the green plus in RStudio. 
 
-4. First we will load packages. If you haven't installed the packages before, please go to your RStudio console:
+__4. First we will load packages.__ If you haven't installed the packages before, please go to your RStudio console:
 
   ```install.packages('randomForest')```
   
