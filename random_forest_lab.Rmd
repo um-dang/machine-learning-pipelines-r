@@ -1,0 +1,245 @@
+---
+title: "Predict colorectal cancer using microbiome data"
+author: "Begum Topcuoglu"
+date: "10/24/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, comment = '', results = 'hold')
+```
+
+### Building a random forest model using native packages in R.
+
+Our goal is to try to predict whether someone has colorectal cancer based on the abundance of different bacteria in their stool microbiome.
+
+- Features: 16S rRNA gene abundances clustered to OTUs (represent bacterial abundances) Label: Health outcome (whether the patient has colorectal cancer or not) 
+- Classification algorithm: Random forest
+
+- Data from: https://github.com/SchlossLab/Sze_CRCMetaAnalysis_mBio_2018
+- Modified from: https://github.com/BTopcuoglu/MachineLearning/blob/master/code/learning/model_pipeline.R
+- Further reading on this project: https://www.biorxiv.org/content/10.1101/816090v1
+- Credit: Thank you Zena Lapp for your live-coding scripts.
+
+1. First thing we do is download the dataset: There are 2 ways of doing this:
+
+  - Clone this repository on your terminal in Mac or Git Bash on Windows if you have it.
+
+    ```
+    git clone https://github.com/um-dang/machine-learning-pipelines-r.git
+    ```
+  - Download the data here: https://tinyurl.com/yyqywozj
+
+2. Create a folder in your Documents directory called machine-learninig-pipelines-r. Then within that folder, create another folder called data. Move the data.tsv file you downloaded into data folder.
+
+3. Open RStudio. Go to File tab, click on New Project, create a project on Existing Directory, navigate to machine-learninig-pipelines-r directory and start the new project. Now you can open a New R script clicking on the green plus in RStudio.
+
+4. First we will load packages. If you haven't installed the packages before, please go to your RStudio console:
+
+```{r}
+# install random forest package
+# DO THIS FROM THE CONSOLE
+#install.packages('randomForest')
+#install.packages('caret')
+
+# load random forest package
+library(randomForest)
+```
+
+5. We are now ready to read in our data.
+```{r}
+# load in data
+data = read.delim('../data/data.tsv')
+```
+
+6. Explore data
+
+Now, let's look at the data a bit. 
+
+```{r}
+# look at data
+data[1:5,1:5]
+```
+
+About the data:
+
+- The rows are different samples, each from a different person
+- The first column is whether the person has cancer or not
+    - 0 means no cancer, 1 means cancer
+    - This is the **label**
+- The rest of the columns are abundance of different OTUs
+    - OTU stands for operational taxonomic unit, which is kind of like a species
+    - Scaled to be between 0 and 1
+    - These are the **features** we will use to classify/predict the label
+  
+How many samples do we have? How many features?
+
+```{r}
+print('number of samples:')
+nrow(data)
+print('number of features:')
+ncol(data)-1
+```
+
+How many cancer samples do we have? Non-cancer samples?
+
+```{r}
+table(data$cancer)
+```
+
+7. Split data into train and test set
+
+The next step is to split the data into a training set (80% of the data) and a test set (20% of the data). We will make a random forest model using the training set and then test the model using the test set.
+
+We need to have a held-out test data, that will not be used for training the model. To create a training dataset and a held-out test dataset we need to make changes to our dataset.
+
+ - First we need to change our label column to a factor. Random forest needs the label to be a factor if we want to do classification modeling. We are classifying having cancer or not having cancer.
+
+```{r}
+# change the label to a factor (categorical variable) instead of a character so random forest does classification instead of regression
+data$cancer = as.factor(data$cancer)
+```
+
+ - Randomly order samples
+```{r}
+random_ordered <- data[sample(nrow(data)),]
+```
+
+  - Determine the number of training samples
+```{r}
+number_training_samples <- ceiling(nrow(random_ordered) * 0.8)
+```
+
+  - Create training and test set
+```{r}
+train <- random_ordered[1:number_training_samples,]
+# Create testing set
+test <- random_ordered[(number_training_samples + 1):nrow(random_ordered),]
+```
+
+Now that we've separated the data into train and test sets, we're ready to create the model! 
+
+Refresher question - what is the model learning to do?
+
+8. Train model with all OTUs
+
+```{r}
+# train model on training data
+# Default mtry = max(floor(ncol(data)/3), 1)
+# Default ntree =  500
+rf_train = randomForest(cancer ~ ., # use all OTUs as features
+                        data = train, # training data
+                        ntree = 500, # 1000 trees in random forest
+                        importance = T, # Include to get importance of features
+                        mtry=500) # Number of features to use to make a decision
+```
+
+9. Test trained model using test data
+
+Now we can use the model to try to classify the samples in the test set as cancer or not. We do this using the `predict` function.
+
+```{r}
+test_pred = predict(rf_train, test)
+```
+
+What would you expect the fraction of correct classifications to be if the variables were entirely uninformative? (i.e. if you randomly classified)
+
+To calculate accuracy of model predictions let's create a function:
+```{r}
+# create function to compare predicted to actual classifications
+check_pred_class = function(dat, pred){
+  # dat is the data
+  # pred is the predicted classifications
+  
+  # correct answers 
+  actual = data.frame(id = rownames(dat), cancer = dat$cancer)
+  # predicted answers
+  predicted = data.frame(id = rownames(dat), cancer = pred)
+  # compare the predicted to the actual classifications
+  comparison = merge(actual, predicted, by = "id", all = FALSE)
+  # fraction correct
+  sum(comparison$cancer.x == comparison$cancer.y)/nrow(comparison)
+  
+}
+```
+
+10. Calculate accuracy. 
+
+Now we can use the model to try to classify the samples in the training set as cancer or not.
+
+```{r}
+# Evaluate accrucay using our function
+check_pred_class(test, test_pred)
+```
+
+How good of a job did our model do? Compare your answer to your neighbors'. How different are your numbers? What might this suggest?
+
+Bonus: what if you want to get the same exact answer every time?
+
+
+### Building a random forest model using a wrapper package called `caret`.
+
+We use `caret` package which is a helpful wrapper that makes our life easier!
+
+- It helps us improve our machine learning pipeline. 
+
+- It makes it easier to use different models with different classification algortihms (not just random forest.)
+
+ `Caret` package is short for Classification And Regression Training) and is a set of functions that attempt to streamline the process for creating predictive models. The package contains tools for all the steps of machine learning. 
+ 
+The syntax for training caret models is a little different than what we used before. Because we can use many different models here, they created a generic train function. We define what the training data is, then the classification method such as random forest. We also define which metric we want to use to evaluate the model. You can look at what options you have with caret here: http://topepo.github.io/caret/index.html.
+
+We can also add a cross-validation step to our model training step.
+
+How do we do all this?
+
+1. First we load the library
+```{r}
+library(caret)
+```
+
+2. Then we need to change the numeric outcomes to a string. Caret doesn't like having numeric outcome variables. 
+```{r}
+train$cancer <- ifelse(train$cancer == 1, "cancer", "normal")
+test$cancer <- ifelse(test$cancer == 1, "cancer", "normal")
+```
+
+3. Now we can create a cross-validation scheme. This is an internal data-split to create a better model where we test different `mtry` parameters and decide which one is better.
+
+How many folds will there be in our cross-validation step? If we pick 5 then 80% of the data will be used to train and 20% will be used to test different mtry options. This will be repeated until each fold is tested (This is an internal datasplit which is applied after the first outer datasplit).
+
+```{r}
+# We will use 5-fold cross-validation
+cv <- trainControl(method="cv", number=5)
+
+# We will test 2 options for mtry and pick the best one 
+grid <-  expand.grid(mtry = c(500, 1000))
+```
+
+4. Let's train our model
+
+```{r}
+trained_model <-  train(cancer ~ .,
+                        data=train,
+                        method = "rf",
+                        metric = "Accuracy",
+                        tuneGrid = grid,
+                        trControl = cv,
+                        ntree=500) # not tuning ntree
+```
+
+Our model is trained and we can see how each `mtry` did.
+```{r}
+trained_model
+```
+
+So, `mtry=1000` was better than `mtry=500` and cross-validation step helped us recognize that. `Caret` package automatically trained on the full training data with `mtry=1000` after determining that it was the best one.
+
+5. Let's see how the model did. We can use the `confusionMatrix` function in the caret package.
+
+```{r}
+#predict the outcome on a test set
+rf_pred <- predict(trained_model, test)
+# compare predicted outcome and true outcome
+confusionMatrix(rf_pred, as.factor(test$cancer))
+```
