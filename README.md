@@ -21,9 +21,7 @@ Credit: Thank you Zena Lapp for your live-coding scripts.
       git clone https://github.com/um-dang/machine-learning-pipelines-r.git
       ```
       
-      - Download the data here: https://tinyurl.com/yyqywozj
-
-2. Create a folder in your Documents directory called `machine-learninig-pipelines-r`. Then within that folder, create another folder called `data`. Move the data.tsv file you downloaded into `data` folder.
+      - Create a folder in your Documents directory called `machine-learninig-pipelines-r`. Then within that folder, create another folder called `data`. Download the data [here](https://tinyurl.com/yyqywozj), then move the `data.tsv` file you downloaded into `data` folder.
 
 __3. Open RStudio.__ Go to `File` tab, click on `New Project`, create a project on `Existing Directory`, navigate to `machine-learninig-pipelines-r` directory and start the new project. Now you can open a New R script clicking on the green plus in RStudio. 
 
