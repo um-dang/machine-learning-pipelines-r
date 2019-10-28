@@ -3,7 +3,9 @@
 Our goal is to try to predict whether someone has colorectal cancer based on the abundance of different bacteria in their stool microbiome.
 
 Feaures: 16S rRNA gene abundances clustered to OTUs (represent bacterial abundances)
+
 Label: Health outcome (whether the patient has colorectal cancer or not)
+
 Classification algorithm: Random forest
 
 - Data from: https://github.com/SchlossLab/Sze_CRCMetaAnalysis_mBio_2018
